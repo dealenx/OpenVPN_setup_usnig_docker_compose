@@ -11,7 +11,7 @@ mkdir -p "$VPN_DATA_DIR"
 # Generate OpenVPN configuration
 echo "Generating OpenVPN server config for $SERVER_NAME..."
 docker run -v "$PWD/openvpn-data/conf":/etc/openvpn --rm kylemanna/openvpn \
-  ovpn_genconfig -u udp://$SERVER_NAME
+  ovpn_genconfig  -e 'duplicate-cn' -e 'topology subnet'  -u udp://$SERVER_NAME
 
 # Initialize PKI with password protection (will prompt you)
 echo "Initializing the PKI (you will be prompted to set a passphrase)..."
