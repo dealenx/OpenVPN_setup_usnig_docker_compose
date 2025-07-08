@@ -33,13 +33,13 @@ setup_openvpn() {
     # Инициализация PKI без пароля (автоматический режим)
     echo "Инициализируем PKI в автоматическом режиме..."
     
-    # Используем expect для автоматического ввода
+    # Используем expect для автоматического ввода, указываем "server" как имя сертификата
     expect -c "
         set timeout 300
         spawn ovpn_initpki nopass
         expect {
             \"*Common Name*\" {
-                send \"$EASYRSA_REQ_CN\r\"
+                send \"server\r\"
                 exp_continue
             }
             \"*Enter PEM pass phrase*\" {
