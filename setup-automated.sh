@@ -32,8 +32,6 @@ EOF
 
 # Основная логика
 if ! check_config_exists; then
-    # Установка expect для автоматизации ввода
-    apt-get update && apt-get install -y expect
     setup_openvpn
 else
     echo "Конфигурация найдена, запускаем сервер..."
