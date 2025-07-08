@@ -33,24 +33,32 @@ setup_openvpn() {
     # Инициализация PKI без пароля (автоматический режим)
     echo "Инициализируем PKI пошагово..."
     
-    # Сначала инициализируем PKI структуру
+    # Переходим в рабочую директорию EasyRSA
+    cd /etc/openvpn
+    
+    # Инициализируем PKI структуру
     easyrsa init-pki
     
     # Создаем CA без пароля
     echo "Создание CA сертификата..."
-    EASYRSA_REQ_CN="$EASYRSA_REQ_CN" easyrsa --batch build-ca nopass
+    easyrsa --batch build-ca nopass
     
     # Генерируем DH параметры
     echo "Генерация DH параметров..."
     easyrsa gen-dh
     
-    # Создаем сертификат сервера с именем "server"
+    # Создаем сертификат и ключ сервера с именем "server"
     echo "Создание сертификата сервера..."
     easyrsa --batch build-server-full server nopass
     
     # Генерируем tls-auth ключ
     echo "Генерация TLS-auth ключа..."
     openvpn --genkey --secret /etc/openvpn/pki/ta.key
+    
+    # Проверим что создалось
+    echo "Проверка созданных сертификатов:"
+    ls -la /etc/openvpn/pki/issued/ || echo "Нет issued директории"
+    ls -la /etc/openvpn/pki/private/ || echo "Нет private директории"
     
     # Проверка успешной инициализации всех необходимых файлов
     echo "Проверка созданных файлов PKI..."
