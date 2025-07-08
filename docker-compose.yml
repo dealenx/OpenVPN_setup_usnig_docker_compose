@@ -6,7 +6,12 @@ services:
       - "11194:1194/udp"
     volumes:
       - ./openvpn-data/conf:/etc/openvpn
+      - ./scripts:/scripts
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun
+    environment:
+      - SERVER_NAME=${SERVER_NAME:-vpn.example.com}
+      - CLIENT_NAME=${CLIENT_NAME:-client1}
+    command: ["/scripts/entrypoint.sh"]
