@@ -1,7 +1,6 @@
 services:
   openvpn:
     image: kylemanna/openvpn
-    container_name: ${PROJECT_NAME}_openvpn
     restart: always
     ports:
       - "1194:1194/udp"
