@@ -31,31 +31,26 @@ setup_openvpn() {
     ovpn_genconfig -e 'duplicate-cn' -e 'topology subnet' -u udp://$SERVER_NAME
     
     # Инициализация PKI без пароля (автоматический режим)
-    echo "Инициализируем PKI в автоматическом режиме..."
+    echo "Инициализируем PKI пошагово..."
     
-    # Используем expect для автоматического ввода, указываем "server" как имя сертификата
-    expect -c "
-        set timeout 300
-        spawn ovpn_initpki nopass
-        expect {
-            \"*Common Name*\" {
-                send \"server\r\"
-                exp_continue
-            }
-            \"*Enter PEM pass phrase*\" {
-                send \"\r\"
-                exp_continue
-            }
-            \"*CA creation complete*\" {
-                puts \"PKI инициализирован успешно\"
-            }
-            timeout {
-                puts \"Таймаут при инициализации PKI\"
-                exit 1
-            }
-            eof
-        }
-    "
+    # Сначала инициализируем PKI структуру
+    easyrsa init-pki
+    
+    # Создаем CA без пароля
+    echo "Создание CA сертификата..."
+    EASYRSA_REQ_CN="$EASYRSA_REQ_CN" easyrsa --batch build-ca nopass
+    
+    # Генерируем DH параметры
+    echo "Генерация DH параметров..."
+    easyrsa gen-dh
+    
+    # Создаем сертификат сервера с именем "server"
+    echo "Создание сертификата сервера..."
+    easyrsa --batch build-server-full server nopass
+    
+    # Генерируем tls-auth ключ
+    echo "Генерация TLS-auth ключа..."
+    openvpn --genkey --secret /etc/openvpn/pki/ta.key
     
     # Проверка успешной инициализации всех необходимых файлов
     echo "Проверка созданных файлов PKI..."
