@@ -18,9 +18,9 @@ if [ ! -f "/etc/openvpn/pki/ca.crt" ]; then
     echo "Генерируем конфигурацию сервера..."
     ovpn_genconfig -e 'duplicate-cn' -e 'topology subnet' -u udp://$SERVER_NAME
     
-    # Инициализируем PKI без пароля для автоматизации
+    # Инициализируем PKI без пароля и с автоматическим подтверждением
     echo "Инициализируем PKI без пароля..."
-    ovpn_initpki nopass
+    echo "yes" | ovpn_initpki nopass
     
     echo "=== Создаем первого клиента ==="
     # Создаем клиента без пароля для автоматизации
