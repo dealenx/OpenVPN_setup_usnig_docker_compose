@@ -3,7 +3,7 @@ services:
     image: kylemanna/openvpn
     restart: always
     ports:
-      - "81194:1194/udp"
+      - "11194:1194/udp"
     volumes:
       - ./openvpn-data/conf:/etc/openvpn
     cap_add:
