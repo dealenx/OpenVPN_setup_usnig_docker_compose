@@ -11,9 +11,10 @@ RUN apk add --no-cache expect
 # Создание директорий
 RUN mkdir -p /etc/openvpn
 
-# Копирование скрипта настройки
+# Копирование скриптов
 COPY setup-automated.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/setup-automated.sh
+COPY add_user_internal.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/setup-automated.sh /usr/local/bin/add_user_internal.sh
 
 # Точка входа для автоматической настройки
 ENTRYPOINT ["/usr/local/bin/setup-automated.sh"]
