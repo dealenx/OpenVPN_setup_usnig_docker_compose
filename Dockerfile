@@ -5,9 +5,6 @@ ENV SERVER_NAME=vpn.example.com
 ENV EASYRSA_BATCH=1
 ENV EASYRSA_REQ_CN="OpenVPN CA"
 
-# Установка дополнительных пакетов для автоматизации (Alpine Linux использует apk)
-RUN apk add --no-cache expect
-
 # Создание директорий
 RUN mkdir -p /etc/openvpn
 

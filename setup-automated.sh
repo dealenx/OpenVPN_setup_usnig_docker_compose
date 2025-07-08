@@ -23,44 +23,23 @@ setup_openvpn() {
     
     # Очистка существующих файлов если они есть
     echo "Очистка старых конфигурационных файлов..."
-    rm -rf /etc/openvpn/pki
-    rm -f /etc/openvpn/openvpn.conf
+    rm -rf /etc/openvpn/*
     
-    # Генерация конфигурации OpenVPN
+    # Генерируем конфигурацию сервера
     echo "Генерируем конфигурацию сервера..."
-    ovpn_genconfig -e 'duplicate-cn' -e 'topology subnet' -u udp://$SERVER_NAME
+    ovpn_genconfig -u udp://$SERVER_NAME
     
-    # Инициализация PKI без пароля (автоматический режим)
-    echo "Инициализируем PKI пошагово..."
+    # Инициализация PKI без паролей (полностью автоматически)
+    echo "Инициализируем PKI автоматически..."
     
-    # Переходим в рабочую директорию EasyRSA
-    cd /etc/openvpn
+    # Используем переменные окружения для автоматизации
+    export EASYRSA_BATCH=1
+    export EASYRSA_REQ_CN="$SERVER_NAME"
     
-    # Инициализируем PKI структуру
-    easyrsa init-pki
+    # Создаем PKI структуру без паролей
+    echo -e "\n\n\n\n\n\n\n" | ovpn_initpki nopass
     
-    # Создаем CA без пароля
-    echo "Создание CA сертификата..."
-    easyrsa --batch build-ca nopass
-    
-    # Генерируем DH параметры
-    echo "Генерация DH параметров..."
-    easyrsa gen-dh
-    
-    # Создаем сертификат и ключ сервера с именем "server"
-    echo "Создание сертификата сервера..."
-    easyrsa --batch build-server-full server nopass
-    
-    # Генерируем tls-auth ключ
-    echo "Генерация TLS-auth ключа..."
-    openvpn --genkey --secret /etc/openvpn/pki/ta.key
-    
-    # Проверим что создалось
-    echo "Проверка созданных сертификатов:"
-    ls -la /etc/openvpn/pki/issued/ || echo "Нет issued директории"
-    ls -la /etc/openvpn/pki/private/ || echo "Нет private директории"
-    
-    # Проверка успешной инициализации всех необходимых файлов
+    # Проверка успешной инициализации
     echo "Проверка созданных файлов PKI..."
     
     REQUIRED_FILES=(
@@ -69,7 +48,6 @@ setup_openvpn() {
         "/etc/openvpn/pki/issued/server.crt"
         "/etc/openvpn/pki/private/server.key"
         "/etc/openvpn/pki/dh.pem"
-        "/etc/openvpn/pki/ta.key"
     )
     
     MISSING_FILES=()
@@ -82,12 +60,23 @@ setup_openvpn() {
     if [ ${#MISSING_FILES[@]} -eq 0 ]; then
         echo "✓ Настройка OpenVPN завершена успешно!"
         echo "✓ Все необходимые файлы PKI созданы."
+        
+        # Показываем созданные файлы
+        echo "Созданные файлы:"
+        ls -la /etc/openvpn/pki/issued/
+        ls -la /etc/openvpn/pki/private/
     else
         echo "✗ Ошибка при настройке OpenVPN!"
         echo "Отсутствующие файлы:"
         for file in "${MISSING_FILES[@]}"; do
             echo "  - $file"
         done
+        
+        # Показываем что есть для диагностики
+        echo "Содержимое /etc/openvpn:"
+        ls -la /etc/openvpn/ || true
+        echo "Содержимое /etc/openvpn/pki:"
+        ls -la /etc/openvpn/pki/ || true
         exit 1
     fi
 }
